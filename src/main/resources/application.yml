@@ -1,0 +1,101 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+    url: jdbc:mysql://localhost:3306/userservice
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+  application:
+    name: "USER-Service"
+
+
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://dev-66842787.okta.com/oauth2/default
+      client:
+        registration:
+          my-internal-client:
+            provider: okta
+            scope: internal
+            clientId: 0oahfe78tf1bVOuiM5d7
+            clientSecret: cCfsyA3n5AP0a9xxWCVU0MwFW21Do365pUnoREIZwnJSqpUtVX-C8T07yd8vGFqy
+        provider:
+          okta:
+            issuerUri: https://dev-66842787.okta.com/oauth2/default
+
+
+
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+  endpoint:
+    health:
+      show-details: ALWAYS
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      ratingHotelBreaker:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 6s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+
+  retry:
+    instances:
+      ratingHotelServiceRetry:
+        maxAttempts: 10
+        waitDuration: 5s
+
+  ratelimiter:
+    instances:
+      UserServiceRateLimiter:
+        limitRefreshPeriod: 4s
+        limitForPeriod: 1
+        timeoutDuration: 0s
+
+okta:
+  oauth2:
+    issuer: https://dev-66842787.okta.com/oauth2/default
+    audience: api://default
+
+
+
+
+
+
+
+
+
